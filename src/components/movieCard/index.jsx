@@ -15,6 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import Grid from "@mui/material/Grid";
 import Avatar from '@mui/material/Avatar';
 import img from '../../images/film-poster-placeholder.png';
+import PlaylistIcon from '../cardIcons/playlist';
 
 export default function MovieCard({ movie, action }) { 
 
@@ -74,15 +75,16 @@ export default function MovieCard({ movie, action }) {
         </Grid>
       </CardContent>
       <CardActions disableSpacing>
-      
+
         {action(movie)}
-      
+        <PlaylistIcon movie={movie} />
+
         <Link to={`/movies/${movie.id}`}>
           <Button variant="outlined" size="medium" color="primary">
             More Info ...
           </Button>
         </Link>
-        
+
       </CardActions>
 
     </Card>
