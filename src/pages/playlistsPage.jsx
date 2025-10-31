@@ -71,8 +71,8 @@ const PlaylistsPage = () => {
         <Spinner />
       ) : (
         <Grid container spacing={2}>
-          {playlists.map((pl) => (
-            <Grid item xs={12} key={pl.id}>
+                      {playlists.map((pl) => (
+            <Grid xs={12} key={pl.id}>
               <Card>
                 <CardHeader
                   title={pl.name}
@@ -90,7 +90,7 @@ const PlaylistsPage = () => {
                   ) : (
                     <Grid container spacing={2}>
                       {moviesMap[pl.id].map((movie) => (
-                        <Grid item xs={12} sm={6} md={3} key={movie.id}>
+                        <Grid xs={12} sm={6} md={3} key={movie.id}>
                           <Card>
                             <CardMedia
                               component="img"

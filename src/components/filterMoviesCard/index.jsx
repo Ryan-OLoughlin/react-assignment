@@ -14,6 +14,9 @@ import Select from "@mui/material/Select";
 import { getGenres } from "../../api/tmdb-api";
 import img from '../../images/pexels-dziana-hasanbekava-5480827.jpg'
 
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+
 const formControl =
 {
     margin: 1,
@@ -41,11 +44,10 @@ export default function FilterMoviesCard(props) {
     }
 
     const handleChange = (e, type, value) => {
-        e.preventDefault();
         props.onUserInput(type, value);
     };
 
-    const handleTextChange = (e, props) => {
+    const handleTextChange = (e) => {
         handleChange(e, "name", e.target.value);
     };
 
@@ -53,7 +55,18 @@ export default function FilterMoviesCard(props) {
         handleChange(e, "genre", e.target.value);
     };
 
+    const handleSortByChange = (e) => {
+        handleChange(e, "sortBy", e.target.value);
+    };
 
+    const handleSortOrderChange = (e) => {
+        handleChange(e, "sortOrder", e.target.value);
+    };
+
+    const handleTypeChange = (e, v) => {
+      // v will be 'movies' or 'people'
+      if (v) handleChange(e, 'filterType', v);
+    };
 
     return (
         <Card
@@ -95,6 +108,61 @@ export default function FilterMoviesCard(props) {
                         })}
                     </Select>
                 </FormControl>
+
+                <FormControl sx={{ ...formControl }}>
+                    <InputLabel id="sortby-label">Sort By</InputLabel>
+                    <Select
+                        labelId="sortby-label"
+                        id="sortby-select"
+                        label="Sort By"
+                        value={props.sortBy || ''}
+                        onChange={handleSortByChange}
+                    >
+                        {props.filterType === 'people' ? (
+                            // When filtering people, show person-specific sort options
+                            [
+                                <MenuItem key="name" value="name">Alphabetical (A-Z)</MenuItem>,
+                                <MenuItem key="age" value="age">Age</MenuItem>,
+                                <MenuItem key="movie_count" value="movie_count">Total Movie Count</MenuItem>
+                            ]
+                        ) : (
+                            // Default movie sort options
+                            [
+                                <MenuItem key="title" value="title">Title (A-Z)</MenuItem>,
+                                <MenuItem key="release_date" value="release_date">Release Date</MenuItem>,
+                                <MenuItem key="vote_average" value="vote_average">Rating</MenuItem>,
+                                <MenuItem key="popularity" value="popularity">Popularity</MenuItem>
+                            ]
+                        )}
+                    </Select>
+                </FormControl>
+
+                <FormControl sx={{ ...formControl }}>
+                    <InputLabel id="sortorder-label">Order</InputLabel>
+                    <Select
+                        labelId="sortorder-label"
+                        id="sortorder-select"
+                        label="Order"
+                        value={props.sortOrder || 'asc'}
+                        onChange={handleSortOrderChange}
+                    >
+                        <MenuItem value="asc">Ascending</MenuItem>
+                        <MenuItem value="desc">Descending</MenuItem>
+                    </Select>
+                </FormControl>
+
+                                {props.showTypeToggle && (
+                                    <ToggleButtonGroup
+                                        value={props.filterType || 'movies'}
+                                        exclusive
+                                        onChange={handleTypeChange}
+                                        aria-label="filter type"
+                                        sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}
+                                    >
+                                        <ToggleButton value="movies">Movies</ToggleButton>
+                                        <ToggleButton value="people">People</ToggleButton>
+                                    </ToggleButtonGroup>
+                                )}
             </CardContent>
             <CardMedia
                 sx={{ height: 300 }}

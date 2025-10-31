@@ -220,7 +220,7 @@ const MovieDetails = ({ movie, videos = [], cast = [] }) => {
           </Typography>
           <Grid container spacing={2}>
             {cast.slice(0, 12).map((c) => (
-              <Grid item key={c.cast_id || c.credit_id || c.id} xs={6} sm={4} md={3} lg={2}>
+              <Grid key={c.cast_id || c.credit_id || c.id} xs={6} sm={4} md={3} lg={2}>
                 <Link to={`/person/${c.id}`}>
                   <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 1 }}>
                     <Avatar
