@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 export const MoviesContext = React.createContext(null);
 
-const STORAGE_KEY = "rmdb_playlists_v1";
+const STORAGE_KEY = "tmdb_playlists_v1";
 
 const MoviesContextProvider = (props) => {
   const [favorites, setFavorites] = useState([]);
@@ -15,7 +15,6 @@ const MoviesContextProvider = (props) => {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setPlaylists(JSON.parse(raw));
     } catch (e) {
-      // ignore parse errors
     }
   }, []);
 
@@ -24,23 +23,36 @@ const MoviesContextProvider = (props) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(playlists));
     } catch (e) {
-      // ignore write errors
     }
   }, [playlists]);
 
-  const addToFavorites = (movie) => {
-    let newFavorites = [];
-    if (!favorites.includes(movie.id)) {
-      newFavorites = [...favorites, movie.id];
-    } else {
-      newFavorites = [...favorites];
+  // load favorites from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('favorites');
+      if (raw) setFavorites(JSON.parse(raw).map((m) => m.id || m));
+    } catch (e) {
     }
-    setFavorites(newFavorites);
+  }, []);
+
+  // persist favorites to localStorage whenever they change (store as array of ids)
+  useEffect(() => {
+    try {
+      localStorage.setItem('favorites', JSON.stringify(favorites.map((id) => id)));
+    } catch (e) {
+    }
+  }, [favorites]);
+
+  const addToFavorites = (movie) => {
+    setFavorites((prev) => {
+      if (!prev.includes(movie.id)) return [...prev, movie.id];
+      return prev;
+    });
   };
 
   // We will use this function in the next step
   const removeFromFavorites = (movie) => {
-    setFavorites(favorites.filter((mId) => mId !== movie.id));
+    setFavorites((prev) => prev.filter((mId) => mId !== movie.id));
   };
 
   const addReview = (movie, review) => {

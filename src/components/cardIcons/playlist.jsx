@@ -49,7 +49,7 @@ const PlaylistIcon = ({ movie }) => {
   return (
     <>
       <IconButton aria-label="add to playlist" onClick={handleOpen}>
-        <PlaylistAddIcon color="primary" fontSize="large" />
+        <PlaylistAddIcon color="secondary" fontSize="large" />
       </IconButton>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
         <DialogTitle>Add to playlist</DialogTitle>

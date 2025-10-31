@@ -1,0 +1,26 @@
+/* Global styles for the app */
+:root{
+  --bg: #0F1720;
+  --text: #E6EEF3;
+  --muted: #94A3B8;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body{
+  margin:0;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: Inter, Roboto, Helvetica, Arial, sans-serif;
+}
+
+a { color: inherit; text-decoration: none; }
+
+img { display: block; max-width: 100%; }
+
+/* small utility */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }

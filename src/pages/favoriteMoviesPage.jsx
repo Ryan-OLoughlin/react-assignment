@@ -29,11 +29,12 @@ const FavoriteMoviesPage = () => {
   }
 
   const movies = favoriteMovieQueries.map((q) => {
-    q.data.genre_ids = q.data.genres.map(g => g.id)
-    return q.data
+    const data = q.data || {};
+    return {
+      ...data,
+      genre_ids: Array.isArray(data.genres) ? data.genres.map((g) => g.id) : [],
+    };
   });
-
-  const toDo = () => true;
 
   return (
     <PageTemplate

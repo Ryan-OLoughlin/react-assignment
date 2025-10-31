@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation } from "react-router";
 import PageTemplate from "../components/templateMoviePage";
 import MovieReview from "../components/movieReview";

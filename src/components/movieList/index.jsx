@@ -9,12 +9,14 @@ const MovieList = (props) => {
   const movieCards = (props.movies || []).map((m) => (
     <Grid
       key={m.id}
+      item
       sx={{
-        padding: "20px",
-        // responsive sizing: stack on small, then use percentage-based width on larger screens
+        padding: 1,
+        // responsive sizing: stack on small, then distribute evenly on larger screens
         boxSizing: 'border-box',
-        flexBasis: { xs: "100%", sm: "50%", md: "33.333%", lg: percent, xl: percent },
-        maxWidth: { xs: "100%", sm: "50%", md: "33.333%", lg: percent, xl: percent },
+        flex: { xs: '1 1 100%', sm: '1 1 50%', md: '1 1 33.333%', lg: `1 1 ${percent}`, xl: `1 1 ${percent}` },
+        // allow items to grow to fill remaining space when there are fewer items than the columns
+        minWidth: { xs: '100%', sm: '50%', md: '33.333%', lg: `calc(${percent} - 8px)`, xl: `calc(${percent} - 8px)` },
       }}
     >
       <Movie key={m.id} movie={m} action={props.action} />

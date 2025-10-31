@@ -66,24 +66,23 @@ function MovieListPageTemplate({ movies, title, action }) {
       <Grid size={12}>
         <Header title={title} />
       </Grid>
-      <Grid container sx={{flex: "1 1 500px"}}>
-        <Grid 
-          key="find" 
-          size={{xs: 12, sm: 6, md: 4, lg: 3, xl: 2}} 
-          sx={{padding: "20px"}}
-        >
-          <FilterCard
-            onUserInput={handleChange}
-            titleFilter={nameFilter}
-            genreFilter={genreFilter}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-          />
+      {/* Filter as a full-width top form */}
+      <Grid container sx={{ flex: "1 1 500px", width: '100%', paddingX: 2, paddingTop: 2 }}>
+        <Grid item xs={12} sx={{ width: '100%' }}>
+            <FilterCard
+              fullWidth
+              onUserInput={handleChange}
+              titleFilter={nameFilter}
+              genreFilter={genreFilter}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+            />
         </Grid>
+
         <Grid 
           key="list" 
-          size={{xs: 12, sm: 6, md: 8, lg: 9, xl: 10}} 
-          sx={{padding: "20px", display: 'flex', flexDirection: 'column'}}
+          item xs={12}
+          sx={{padding: 2, display: 'flex', flexDirection: 'column'}}
         >
           <Grid container>
             <MovieList action={action} movies={pagedMovies}></MovieList>

@@ -9,9 +9,15 @@ import Fab from "@mui/material/Fab";
 import Typography from "@mui/material/Typography";
 import Drawer from "@mui/material/Drawer";
 import MovieReviews from "../movieReviews"
+import usePerson from '../../hooks/usePerson';
+import { calculateAge } from '../../util.jsx';
 import LanguageIcon from '@mui/icons-material/Language';
 import SavingsIcon from '@mui/icons-material/Savings';
 import { getRecommendations } from "../../api/tmdb-api";
+import useRecommendations from '../../hooks/useRecommendations';
+import MovieList from '../movieList';
+import Spinner from '../spinner';
+import AddToFavoritesIcon from '../cardIcons/addToFavorites';
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -58,6 +64,45 @@ const MovieDetails = ({ movie, videos = [], cast = [] }) => {
   const colSize = trailersToShow.length === 1 ? 12 : trailersToShow.length === 2 ? 6 : 4;
 
   const [selectedTrailer, setSelectedTrailer] = useState(null);
+
+  // Component to fetch person details and show age inside the cast grid
+  const CastMemberCard = ({ c }) => {
+    const { person } = usePerson(c.id);
+    const age = person && person.birthday ? calculateAge(person.birthday) : null;
+
+    return (
+      <Grid key={c.cast_id || c.credit_id || c.id} xs={6} sm={4} md={3} lg={2}>
+        <Link to={`/person/${c.id}`}>
+          <Card sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 1 }}>
+            <Avatar
+              src={
+                (person && person.profile_path)
+                  ? `https://image.tmdb.org/t/p/w185${person.profile_path}`
+                  : c.profile_path
+                    ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+                    : undefined
+              }
+              alt={person ? person.name : c.name}
+              sx={{ width: 88, height: 88, mb: 1 }}
+            />
+            <Typography variant="subtitle2" noWrap sx={{ textAlign: "center" }}>
+              {person ? person.name : c.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ textAlign: "center" }}>
+              {c.character}
+            </Typography>
+            {age !== null && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                Age: {age}
+              </Typography>
+            )}
+          </Card>
+        </Link>
+      </Grid>
+    );
+  };
+
+  const { recommendations, isPending: recPending, isError: recError, error: recErrorObj } = useRecommendations(movie.id);
 
   const openTrailer = (t) => setSelectedTrailer(t);
   const closeTrailer = () => setSelectedTrailer(null);
@@ -240,6 +285,27 @@ const MovieDetails = ({ movie, videos = [], cast = [] }) => {
             ))}
           </Grid>
         </Box>
+      )}
+
+      {recPending ? (
+        <Box sx={{ mt: 3, width: '100%' }}>
+          <Spinner />
+        </Box>
+      ) : recError ? (
+        <Box sx={{ mt: 3, width: '100%' }}>
+          <Typography variant="body1">{recErrorObj?.message || 'Error loading recommendations'}</Typography>
+        </Box>
+      ) : (
+        recommendations && recommendations.length > 0 && (
+          <Box sx={{ mt: 3, width: '100%' }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Recommendations
+            </Typography>
+            <Grid container spacing={2}>
+              <MovieList movies={recommendations} cols={6} action={(m) => <AddToFavoritesIcon movie={m} />} />
+            </Grid>
+          </Box>
+        )
       )}
 
     </>

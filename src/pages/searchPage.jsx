@@ -36,19 +36,6 @@ const SearchPage = () => {
   const [peopleAges, setPeopleAges] = useState({});
   const [peopleAgesLoading, setPeopleAgesLoading] = useState(false);
 
-  // Diagnostics
-  if (typeof window !== "undefined") {
-    try {
-      console.log(
-        "[SearchPage] invoking hooks with searchQuery=",
-        JSON.stringify(searchQuery),
-        "type=",
-        type,
-        "page=",
-        page
-      );
-    } catch {}
-  }
 
   // Data hooks
   const {
@@ -182,11 +169,11 @@ const SearchPage = () => {
     });
   };
 
-  // When sorting by age, fetch person details (batched, cached)
+  // Fetch person details (batched, cached) when viewing people so we can show ages
   useEffect(() => {
     let cancelled = false;
     const loadAges = async () => {
-      if (type !== "people" || sortBy !== "age" || !people || people.length === 0)
+      if (type !== "people" || !people || people.length === 0)
         return;
       const ids = people.map((p) => p.id).filter(Boolean);
       const missing = ids.filter((id) => !(id in peopleAgesCache.current));
@@ -259,43 +246,41 @@ const SearchPage = () => {
         <Header title="Search" />
       </Grid>
 
-      {/* Main container row (same as template) */}
       <Grid container sx={{ flex: "1 1 500px" }}>
-        {/* Left column: Search box + Filter card (like Home's left rail) */}
-        <Grid
-          key="find"
-          size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
-          sx={{ padding: "20px" }}
-        >
-          {/* Search box sits above the filter, below the header */}
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-            <TextField
-              label="Search term"
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && onSearch()}
-              fullWidth
-            />
-            <Button variant="contained" onClick={onSearch}>
-              Search
-            </Button>
-          </Box>
+        <Grid item xs={12} sx={{ width: '100%', paddingX: 2, paddingTop: 2 }}>
+          <div className="container">
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+              <TextField
+                label="Search term"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSearch()}
+                fullWidth
+                color="primary"
+              />
+              <Button variant="contained" color="primary" onClick={onSearch}>
+                Search
+              </Button>
+            </Box>
 
-          <FilterCard
-            onUserInput={handleFilterChange}
-            titleFilter={term}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            filterType={filterType}
-            showTypeToggle={true}
-          />
+            <FilterCard
+              fullWidth
+              onUserInput={handleFilterChange}
+              showSearch={false}
+              titleFilter={term}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              filterType={filterType}
+              showTypeToggle={true}
+            />
+          </div>
         </Grid>
 
-        {/* Right column: Results list (movies/people) */}
+        {/* Results list (movies/people) */}
         <Grid
           key="list"
-          size={{ xs: 12, sm: 6, md: 8, lg: 9, xl: 10 }}
-          sx={{ padding: "20px", display: "flex", flexDirection: "column" }}
+          item xs={12}
+          sx={{ padding: 2, display: "flex", flexDirection: "column" }}
         >
           {isLoading && <Spinner />}
 
@@ -344,7 +329,7 @@ const SearchPage = () => {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, p: 2 }}>
                   <Spinner />
                   <Typography>
-                    Loading ages for people (this may make a few additional API requests)...
+                    Loading ages for people...
                   </Typography>
                 </Box>
               ) : (
@@ -380,6 +365,11 @@ const SearchPage = () => {
                                 .slice(0, 3)
                                 .join(", ")}
                             </Typography>
+                          )}
+                          {(peopleAges && Object.prototype.hasOwnProperty.call(peopleAges, p.id)) ? (
+                            <Typography variant="body2">Age: {peopleAges[p.id] !== null ? peopleAges[p.id] : 'Unknown'}</Typography>
+                          ) : (
+                            peopleAgesLoading && <Typography variant="body2">Age: loading...</Typography>
                           )}
                         </CardContent>
                       </Card>

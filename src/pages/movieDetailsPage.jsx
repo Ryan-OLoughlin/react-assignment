@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from 'react-router';
 import PageTemplate from "../components/templateMoviePage";
 import MovieDetails from "../components/movieDetails";

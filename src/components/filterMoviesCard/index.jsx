@@ -1,4 +1,3 @@
-import React from "react";
 import { useQuery } from '@tanstack/react-query';
 import Spinner from '../spinner';
 import Card from "@mui/material/Card";
@@ -12,7 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { getGenres } from "../../api/tmdb-api";
-import img from '../../images/pexels-dziana-hasanbekava-5480827.jpg'
+import img from '../../images/projector.jpg';
 
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -20,8 +19,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 const formControl =
 {
     margin: 1,
-    minWidth: "90%",
-    backgroundColor: "rgb(255, 255, 255)"
+    minWidth: "99%",
 };
 
 export default function FilterMoviesCard(props) {
@@ -38,49 +36,43 @@ export default function FilterMoviesCard(props) {
     if (isError) {
         return <h1>{error.message}</h1>;
     }
-    const genres = data.genres;
-    if (genres[0].name !== "All") {
-        genres.unshift({ id: "0", name: "All" });
-    }
+    const genres = (data && data.genres) || [];
+    const genreOptions = (genres[0] && genres[0].name !== 'All')
+        ? [{ id: '0', name: 'All' }, ...genres]
+        : genres;
 
-    const handleChange = (e, type, value) => {
-        props.onUserInput(type, value);
-    };
-
-    const handleTextChange = (e) => {
-        handleChange(e, "name", e.target.value);
-    };
-
-    const handleGenreChange = (e) => {
-        handleChange(e, "genre", e.target.value);
-    };
-
-    const handleSortByChange = (e) => {
-        handleChange(e, "sortBy", e.target.value);
-    };
-
-    const handleSortOrderChange = (e) => {
-        handleChange(e, "sortOrder", e.target.value);
-    };
-
-    const handleTypeChange = (e, v) => {
-      // v will be 'movies' or 'people'
-      if (v) handleChange(e, 'filterType', v);
-    };
+    const onUserInput = props.onUserInput;
+    const handleTextChange = (e) => onUserInput('name', e.target.value);
+    const handleGenreChange = (e) => onUserInput('genre', e.target.value);
+    const handleSortByChange = (e) => onUserInput('sortBy', e.target.value);
+    const handleSortOrderChange = (e) => onUserInput('sortOrder', e.target.value);
+    const handleTypeChange = (e, v) => { if (v) onUserInput('filterType', v); };
 
     return (
         <Card
-            sx={{
-                backgroundColor: "rgb(204, 204, 0)"
-            }}
-            variant="outlined">
+            sx={(theme) => ({
+                backgroundColor: props.fullWidth ? 'transparent' : theme.palette.background.paper,
+                boxShadow: props.fullWidth ? 'none' : undefined,
+                border: '2px solid',
+                borderColor: 'primary.main',
+                borderRadius: 2,
+                p: props.fullWidth ? 2 : undefined,
+                ...(props.fullWidth ? {
+                  backgroundImage: `linear-gradient(rgba(11,27,43,0.45), rgba(11,27,43,0.45)), url(${img})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  color: theme.palette.primary.contrastText,
+                } : {}),
+            })}
+            variant={props.fullWidth ? 'elevation' : 'outlined'}>
             <CardContent>
-                <Typography variant="h5" component="h1">
-                    <SearchIcon fontSize="large" />
+                <Typography variant="h5" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SearchIcon sx={{ color: 'primary.main' }} fontSize="large" />
                     Filter the movies.
                 </Typography>
+                {props.showSearch !== false && (
                 <TextField
-                    sx={{ ...formControl }}
+                    sx={{ ...formControl, backgroundColor: 'rgba(191,87,0,0.06)', borderRadius: 1 }}
                     id="filled-search"
                     label="Search field"
                     type="search"
@@ -88,6 +80,7 @@ export default function FilterMoviesCard(props) {
                     value={props.titleFilter}
                     onChange={handleTextChange}
                 />
+                )}
 
                 <FormControl sx={{ ...formControl }}>
                     <InputLabel id="genre-label">Genre</InputLabel>
@@ -99,7 +92,7 @@ export default function FilterMoviesCard(props) {
                         value={props.genreFilter}
                         onChange={handleGenreChange}
                     >
-                        {genres.map((genre) => {
+                        {genreOptions.map((genre) => {
                             return (
                                 <MenuItem key={genre.id} value={genre.id}>
                                     {genre.name}
@@ -164,18 +157,13 @@ export default function FilterMoviesCard(props) {
                                     </ToggleButtonGroup>
                                 )}
             </CardContent>
-            <CardMedia
-                sx={{ height: 300 }}
-                image={img}
-                title="Filter"
-            />
-            <CardContent>
-                <Typography variant="h5" component="h1">
-                    <SearchIcon fontSize="large" />
-                    Filter the movies.
-                    <br />
-                </Typography>
-            </CardContent>
+            {!props.fullWidth && (
+                <CardMedia
+                    sx={{ height: 300 }}
+                    image={img}
+                    title="Filter"
+                />
+            )}
         </Card>
     );
 }

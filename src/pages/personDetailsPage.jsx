@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from "react-router";
 import usePersonCredits from '../hooks/usePersonCredits'
 import { getPersonMovieCredits } from "../api/tmdb-api";

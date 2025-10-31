@@ -44,14 +44,14 @@ const SiteHeader = () => {
 
   return (
     <>
-      <AppBar position="fixed" color="secondary">
+  <AppBar position="fixed" color="primary" sx={{ backgroundColor: 'primary.main' }}>
         <Toolbar>
-          <Typography variant="h4" sx={{ flexGrow: 1 }}>
-            TMDB Client
+          <Typography variant="h5" sx={{ flexGrow: 1, color: 'primary.contrastText' }}>
+            DaMovieDB.ie
           </Typography>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          {/* <Typography variant="subtitle1" sx={{ flexGrow: 1, color: 'primary.contrastText' }}>
             Watch this stuff dawg!
-          </Typography>
+          </Typography> */}
             {isMobile ? (
               <>
                 <IconButton
