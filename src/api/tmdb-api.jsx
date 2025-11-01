@@ -38,7 +38,7 @@ export const getMovie = (args) => {
       "https://api.themoviedb.org/3/genre/movie/list?api_key=" +
         import.meta.env.VITE_TMDB_KEY +
         "&language=en-US"
-    ).then( (response) => {
+    ).then((response) => {
       if (!response.ok) {
         return response.json().then((error) => {
           throw new Error(error.status_message || "Something went wrong");
@@ -47,7 +47,7 @@ export const getMovie = (args) => {
       return response.json();
     })
     .catch((error) => {
-      throw error
+      throw error;
    });
   };
 
@@ -232,24 +232,6 @@ export const getSearchMovies = ({ queryKey }) => {
   const { query = '', page = 1 } = params;
   return fetch(
     `https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
-  ).then((response) => {
-    if (!response.ok) {
-      return response.json().then((error) => {
-        throw new Error(error.status_message || "Something went wrong");
-      });
-    }
-    return response.json().then((data) => data);
-  })
-  .catch((error) => {
-    throw error
- });
-};
-
-export const getSearchPeople = ({ queryKey }) => {
-  const [, params = {}] = queryKey;
-  const { query = '', page = 1 } = params;
-  return fetch(
-    `https://api.themoviedb.org/3/search/person?api_key=${import.meta.env.VITE_TMDB_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
   ).then((response) => {
     if (!response.ok) {
       return response.json().then((error) => {

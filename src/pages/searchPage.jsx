@@ -5,15 +5,8 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Pagination from "@mui/material/Pagination";
 import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
-import { Link } from "react-router";
 import Header from "../components/headerMovieList";
 import useSearchMovies from "../hooks/useSearchMovies";
-import useSearchPeople from "../hooks/useSearchPeople";
-import { getPerson } from "../api/tmdb-api";
 import MovieList from "../components/movieList";
 import Spinner from "../components/spinner";
 import FilterCard from "../components/filterMoviesCard";
@@ -22,37 +15,21 @@ const SearchPage = () => {
   const [term, setTerm] = useState("");
   // committed query used to run searches (set when user clicks Search)
   const [searchQuery, setSearchQuery] = useState("");
-  const [type, setType] = useState("movies"); // 'movies' or 'people'
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [genreFilter, setGenreFilter] = useState("0");
-  const [filterType, setFilterType] = useState("movies");
 
   const topRef = useRef(null);
-
-  // per-session cache for person ages (avoid refetching same person)
-  const peopleAgesCache = useRef({});
-  const [peopleAges, setPeopleAges] = useState({});
-  const [peopleAgesLoading, setPeopleAgesLoading] = useState(false);
-
 
   // Data hooks
   const {
     movies,
     totalPages: moviesTotalPages,
     isPending: moviesPending,
-  } = useSearchMovies(type === "movies" ? searchQuery : "", page);
+  } = useSearchMovies(searchQuery, page);
 
-  const {
-    people,
-    totalPages: peopleTotalPages,
-    isPending: peoplePending,
-  } = useSearchPeople(type === "people" ? searchQuery : "", page);
-
-  const isLoading =
-    (type === "movies" && moviesPending) ||
-    (type === "people" && peoplePending);
+  const isLoading = moviesPending;
 
   // Actions
   const onSearch = () => {
@@ -75,16 +52,13 @@ const SearchPage = () => {
   // Reset page when query or filters change
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, type, sortBy, sortOrder, genreFilter]);
+  }, [searchQuery, sortBy, sortOrder, genreFilter]);
 
   const handleFilterChange = (t, v) => {
     if (t === "name") setTerm(v);
     else if (t === "sortBy") setSortBy(v);
     else if (t === "sortOrder") setSortOrder(v);
-    else if (t === "filterType") {
-      setFilterType(v);
-      setType(v);
-    } else if (t === "genre") {
+    else if (t === "genre") {
       setGenreFilter(String(v));
     }
   };
@@ -123,121 +97,9 @@ const SearchPage = () => {
     );
   };
 
-  // Sorting helper (people)
-  const applyPeopleSort = (list = [], sortBy, sortOrder) => {
-    if (!list) return [];
-    const actors = list.filter((p) => {
-      if (!p) return false;
-      if ((p.known_for_department || "").toLowerCase() !== "acting")
-        return false;
-      const name = (p.name || "").trim();
-      return name.split(/\s+/).length >= 2;
-    });
-    if (!sortBy) return actors;
-    const dir = sortOrder === "asc" ? 1 : -1;
-    return actors.slice().sort((a, b) => {
-      if (sortBy === "name" || sortBy === "title") {
-        const A = (a.name || "").toLowerCase();
-        const B = (b.name || "").toLowerCase();
-        return A.localeCompare(B) * dir;
-      }
-      if (sortBy === "popularity") {
-        const A = Number(a.popularity || 0);
-        const B = Number(b.popularity || 0);
-        return (A - B) * dir;
-      }
-      if (sortBy === "movie_count") {
-        const A = Array.isArray(a.known_for) ? a.known_for.length : 0;
-        const B = Array.isArray(b.known_for) ? b.known_for.length : 0;
-        return (A - B) * dir;
-      }
-      if (sortBy === "age") {
-        const A =
-          typeof peopleAges === "object" && peopleAges[a.id] != null
-            ? peopleAges[a.id]
-            : null;
-        const B =
-          typeof peopleAges === "object" && peopleAges[b.id] != null
-            ? peopleAges[b.id]
-            : null;
-        if (A === null && B === null) return 0;
-        if (A === null) return 1 * dir; // unknown ages go last
-        if (B === null) return -1 * dir;
-        return (A - B) * dir;
-      }
-      return 0;
-    });
-  };
+  
 
-  // Fetch person details (batched, cached) when viewing people so we can show ages
-  useEffect(() => {
-    let cancelled = false;
-    const loadAges = async () => {
-      if (type !== "people" || !people || people.length === 0)
-        return;
-      const ids = people.map((p) => p.id).filter(Boolean);
-      const missing = ids.filter((id) => !(id in peopleAgesCache.current));
-      if (missing.length === 0) {
-        const map = {};
-        ids.forEach((id) => {
-          map[id] =
-            peopleAgesCache.current[id] !== undefined
-              ? peopleAgesCache.current[id]
-              : null;
-        });
-        setPeopleAges(map);
-        return;
-      }
-      setPeopleAgesLoading(true);
-      try {
-        const batchSize = 4;
-        for (let i = 0; i < missing.length; i += batchSize) {
-          const batch = missing.slice(i, i + batchSize);
-          const results = await Promise.all(
-            batch.map(async (id) => {
-              try {
-                const details = await getPerson(id);
-                return {
-                  id,
-                  birthday: details && details.birthday ? details.birthday : null,
-                };
-              } catch {
-                return { id, birthday: null };
-              }
-            })
-          );
-          if (cancelled) return;
-          const now = new Date();
-          results.forEach((r) => {
-            if (r && r.birthday) {
-              const b = new Date(r.birthday);
-              let age = now.getFullYear() - b.getFullYear();
-              const m = now.getMonth() - b.getMonth();
-              if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age -= 1;
-              peopleAgesCache.current[r.id] = age;
-            } else {
-              peopleAgesCache.current[r.id] = null;
-            }
-          });
-        }
-        if (cancelled) return;
-        const map = {};
-        ids.forEach((id) => {
-          map[id] =
-            peopleAgesCache.current[id] !== undefined
-              ? peopleAgesCache.current[id]
-              : null;
-        });
-        setPeopleAges(map);
-      } finally {
-        if (!cancelled) setPeopleAgesLoading(false);
-      }
-    };
-    loadAges();
-    return () => {
-      cancelled = true;
-    };
-  }, [people, sortBy, type]);
+  
 
   return (
     <Grid container>
@@ -270,8 +132,8 @@ const SearchPage = () => {
               titleFilter={term}
               sortBy={sortBy}
               sortOrder={sortOrder}
-              filterType={filterType}
-              showTypeToggle={true}
+              filterType={"movies"}
+              showTypeToggle={false}
             />
           </div>
         </Grid>
@@ -285,7 +147,7 @@ const SearchPage = () => {
           {isLoading && <Spinner />}
 
           {/* Movies */}
-          {!isLoading && type === "movies" && (
+          {!isLoading && movies && (
             <>
               <Grid container>
                 <MovieList
@@ -305,85 +167,6 @@ const SearchPage = () => {
                 >
                   <Pagination
                     count={moviesTotalPages}
-                    page={page}
-                    onChange={handleSearchPageChange}
-                    color="primary"
-                    size="large"
-                    sx={{
-                      "& .MuiPaginationItem-root": {
-                        fontSize: "1.05rem",
-                        minWidth: 40,
-                        minHeight: 40,
-                      },
-                    }}
-                  />
-                </Box>
-              )}
-            </>
-          )}
-
-          {/* People */}
-          {!isLoading && type === "people" && (
-            <>
-              {sortBy === "age" && peopleAgesLoading ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2, p: 2 }}>
-                  <Spinner />
-                  <Typography>
-                    Loading ages for people...
-                  </Typography>
-                </Box>
-              ) : (
-                <Grid container spacing={2}>
-                  {applyPeopleSort(people, sortBy, sortOrder).map((p) => (
-                    <Grid
-                      key={p.id}
-                      size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
-                      sx={{ padding: 2 }}
-                    >
-                      <Card>
-                        <CardHeader
-                          avatar={
-                            <Avatar
-                              src={
-                                p.profile_path
-                                  ? `https://image.tmdb.org/t/p/w200/${p.profile_path}`
-                                  : undefined
-                              }
-                              alt={p.name}
-                            />
-                          }
-                          title={<Link to={`/person/${p.id}`}>{p.name}</Link>}
-                          subheader={p.known_for_department}
-                        />
-                        <CardContent>
-                          {p.known_for && p.known_for.length > 0 && (
-                            <Typography variant="body2">
-                              Known for:{" "}
-                              {p.known_for
-                                .map((k) => k.title || k.name)
-                                .filter(Boolean)
-                                .slice(0, 3)
-                                .join(", ")}
-                            </Typography>
-                          )}
-                          {(peopleAges && Object.prototype.hasOwnProperty.call(peopleAges, p.id)) ? (
-                            <Typography variant="body2">Age: {peopleAges[p.id] !== null ? peopleAges[p.id] : 'Unknown'}</Typography>
-                          ) : (
-                            peopleAgesLoading && <Typography variant="body2">Age: loading...</Typography>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-
-              {peopleTotalPages > 1 && (
-                <Box
-                  sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 4 }}
-                >
-                  <Pagination
-                    count={peopleTotalPages}
                     page={page}
                     onChange={handleSearchPageChange}
                     color="primary"
