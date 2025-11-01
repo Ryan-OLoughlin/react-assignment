@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Pagination from "@mui/material/Pagination";
-import Typography from "@mui/material/Typography";
 import Header from "../components/headerMovieList";
 import useSearchMovies from "../hooks/useSearchMovies";
 import MovieList from "../components/movieList";

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
@@ -14,11 +14,16 @@ import { MoviesContext } from "../contexts/moviesContext";
 import { getMovie } from "../api/tmdb-api";
 import Spinner from "../components/spinner";
 import img from '../images/film-poster-placeholder.png';
+import Paper from "@mui/material/Paper";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from "react-router";
 
 const PlaylistsPage = () => {
   const { playlists, deletePlaylist, removeMovieFromPlaylist } = useContext(MoviesContext);
   const [moviesMap, setMoviesMap] = useState({}); // playlistId -> [movie]
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -63,9 +68,28 @@ const PlaylistsPage = () => {
 
   return (
     <Container>
-      <Typography variant="h4" component="h2" gutterBottom>
+      <Paper 
+        component="div" 
+        sx={{
+            display: "flex",
+            justifyContent: "space-around",
+            flexWrap: "wrap",
+            padding: 1.5,
+            margin: 0,
+        }}
+      >
+      <IconButton aria-label="go back" onClick={() => navigate(-1)} >
+        <ArrowBackIcon color="primary" fontSize="large" />
+      </IconButton>
+
+      <Typography variant="h4" component="h3">
         Your Playlists
-      </Typography>
+        </Typography>
+
+      <IconButton aria-label="go forward" onClick={() => navigate(+1) } >
+        <ArrowForwardIcon color="primary" fontSize="large" />
+      </IconButton>
+    </Paper>
 
       {loading ? (
         <Spinner />

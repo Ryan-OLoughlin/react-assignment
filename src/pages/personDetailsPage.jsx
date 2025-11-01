@@ -1,6 +1,5 @@
 import { useParams } from "react-router";
 import usePersonCredits from '../hooks/usePersonCredits'
-import { getPersonMovieCredits } from "../api/tmdb-api";
 import usePerson from '../hooks/usePerson'
 import Spinner from "../components/spinner";
 import Grid from "@mui/material/Grid";
@@ -9,9 +8,15 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import MovieList from "../components/movieList";
 import AddToFavoritesIcon from '../components/cardIcons/addToFavorites';
+import Paper from "@mui/material/Paper";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from "react-router";
 
 const PersonDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { person, isPending: personPending, isError: personIsError, error: personError } = usePerson(id);
 
@@ -26,6 +31,28 @@ const PersonDetailsPage = () => {
 
   return (
     <Box sx={{ p: 2 }}>
+      <Paper 
+        component="div" 
+        sx={{
+            display: "flex",
+            justifyContent: "space-around",
+            flexWrap: "wrap",
+            padding: 1.5,
+            margin: 0,
+        }}
+      >
+      <IconButton aria-label="go back" onClick={() => navigate(-1)} >
+        <ArrowBackIcon color="primary" fontSize="large" />
+      </IconButton>
+
+      <Typography variant="h4" component="h3">
+        {person.name}
+        </Typography>
+
+      <IconButton aria-label="go forward" onClick={() => navigate(+1) } >
+        <ArrowForwardIcon color="primary" fontSize="large" />
+      </IconButton>
+    </Paper>
       <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
         <Avatar
           src={person.profile_path ? `https://image.tmdb.org/t/p/w300/${person.profile_path}` : undefined}
@@ -33,7 +60,6 @@ const PersonDetailsPage = () => {
           sx={{ width: 200, height: 300 }}
         />
         <Box>
-          <Typography variant="h4">{person.name}</Typography>
           <Typography variant="subtitle1" color="text.secondary">
             {person.known_for_department} {person.birthday ? `• Born ${person.birthday}` : ""} {person.place_of_birth ? `• ${person.place_of_birth}` : ""}
           </Typography>

@@ -7,7 +7,6 @@ import DialogContent from "@mui/material/DialogContent";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
 import Checkbox from "@mui/material/Checkbox";
 import IconButtonMui from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
@@ -59,7 +58,6 @@ const PlaylistIcon = ({ movie }) => {
               context.playlists.map((pl) => (
                 <ListItem key={pl.id} button onClick={() => toggleInPlaylist(pl)}>
                   <ListItemText primary={pl.name} />
-                  <ListItemSecondaryAction>
                     <Checkbox
                       edge="end"
                       onChange={() => toggleInPlaylist(pl)}
@@ -68,7 +66,6 @@ const PlaylistIcon = ({ movie }) => {
                     <IconButtonMui edge="end" onClick={() => handleDeletePlaylist(pl.id)}>
                       <DeleteIcon />
                     </IconButtonMui>
-                  </ListItemSecondaryAction>
                 </ListItem>
               ))
             ) : (
